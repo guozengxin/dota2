@@ -7,6 +7,7 @@ import urllib
 def fetch(url, args):
 	url = url + '?' + urllib.urlencode(args)
 	request = urllib2.Request(url)
+	request.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/30.0.1599.114 Chrome/30.0.1599.114')
 	response = urllib2.urlopen(request)
 	data = response.read()
 	return data
@@ -367,6 +368,196 @@ def GetTeamInfoByTeamID(key, start_at_team_id=-1, teams_requested=-1):
 		args.update({'teams_requested':teams_requested})
 	return fetch(url, args)
 
+def GetTournamentPlayerStats(key, account_id='', league_id='', hero_id='', time_frame=''):
+	'''
+	Method-specific parameters
+	account_id (string)
+		32-bit account ID.
+	league_id (Optional) (string)
+		A list of league IDs can be found via the GetLeagueListing method. Will return status 8 - only supports tournament 65006 (The International) unless you provide 65006.
+	hero_id (Optional) (string)
+		A list of hero IDs can be found via the GetHeroes method.
+	time_frame (Optional) (string)
+		Only return stats between this time frame (parameter format not yet known).
+
+	Result:
+		status
+			1 - Success
+			8 - only supports tournament 65006 (The International).
+		statusDetail
+			A message explaining the status, should status not be 1.
+		num_results
+			Number of matches returned.
+		matches
+			An array of matches.
+			player_slot
+				See #Player Slot.
+			hero_id
+				The hero's unique ID. A list of hero IDs can be found via the GetHeroes method.
+			item_0
+				ID of the top-left inventory item.
+			item_1
+				ID of the top-center inventory item.
+			item_2
+				ID of the top-right inventory item.
+			item_3
+				ID of the bottom-left inventory item.
+			item_4
+				ID of the bottom-center inventory item.
+			item_5
+				ID of the bottom-right inventory item.
+			kills
+				The amount of kills attributed to this player.
+			deaths
+				The amount of times this player died during the match.
+			assists
+				The amount of assists attributed to this player.
+			gold
+				The amount of gold the player had remaining at the end of the match.
+			last_hits
+				The amount of last-hits the player got during the match.
+			denies
+				The amount of denies the player got during the match.
+			gold_per_min
+				The player's overall gold/minute.
+			xp_per_min
+				The player's overall experience/minute.
+			gold_spent
+				The amount of gold the player spent during the match.
+			level
+				The player's level at match end.
+			win
+				Whether the player won the match or not (values: "true" or "false").
+			match_id
+				The match's unique ID.
+			duration
+				The length of the match, in seconds since the match began.
+		account_id
+			32-bit account ID.
+		persona
+			Account's current Steam profile name.
+		num_results
+			Number of matches returned.
+		wins
+			Number of the matches won.
+		losses
+			Number of the matches lost.
+		kills
+			Number of kills across all of the matches.
+		deaths
+			Number of deaths across all of the matches.
+		assists
+			Number of assists across all of the matches.
+		kills_average
+			Average number of kills per match.
+		deaths_average
+			Average number of deaths per match.
+		assists_average
+			Average number of assists per match.
+		gpm_average
+			Average gold per minute across all of the matches.
+		xpm_average
+			Average experience per minute across all of the matches.
+		best_kills
+			Most kills in one of the matches.
+		best_kills_heroid
+			Which Hero the player was playing when they achieved best_kills. A list of hero IDs can be found via the GetHeroes method.
+		best_gpm
+			Highest gold per minute in one of the matches.
+		best_gpm_heroid
+			Which Hero the player was playing when they achieved best_gpm. A list of hero IDs can be found via the GetHeroes method.
+		heroes_played
+			An array of heroes played.
+		id
+			The hero's unique ID. A list of hero IDs can be found via the GetHeroes method.
+		wins
+			Number of matches won with this hero.
+		losses
+			Number of matches lost with this hero.
+	'''
+	url = 'http://api.steampowered.com/IDOTA2Match_570/GetTournamentPlayerStats/v1'
+	args = {'key': key}
+	if account_id:
+		args.update({'account_id': account_id})
+	if league_id:
+		args.update({'league_id': league_id})
+	if hero_id:
+		args.update({'hero_id': hero_id})
+	if time_frame:
+		args.update({'time_frame': time_frame})
+	return fetch(url, args)
+
+def GetRarities(key, language=''):
+	'''
+	result
+		count
+			Possible number of rarities. This number appears to be[1] currently incorrect and off by one.
+		rarities
+			List of rarity objects
+			name
+				The internal rarity name string.
+			id
+				ID of rarity, used for indexing.
+			order
+				Sorting and logical order of rarities, from most distributed to least.
+			color
+				String of the hexadecimal RGB tuple of the rarity name as it is displayed in-game.
+			localized_name
+				The localized name of the rarity for use in name display.
+	'''
+	url = 'http://api.steampowered.com/IEconDOTA2_570/GetRarities/v1'
+	args = {'key': key, 'language': language}
+	return fetch(url, args)
+
+def GetHeroes(key, language='', itemizedonly=-1):
+	'''
+	result
+		heroes
+			List of heroes.
+			name
+				The tokenized string for the name of the hero.
+			id
+				ID of the hero.
+			localized_name
+				The localized name of the hero for use in name display.
+		count
+			Number of results.
+	'''
+	url = 'http://api.steampowered.com/IEconDOTA2_570/GetHeroes/v1'
+	args = {'key': key}
+	if language:
+		args.update({'language': language})
+	if itemizedonly != -1:
+		args.update({'itemizedonly': itemizedonly})
+	return fetch(url, args)
+
+def GetSupportedAPIList(key):
+	'''
+	apilist (array)
+		interfaces (array)
+			name (string)
+				Name of Interface.
+			methods (array)
+				Methods with-in the interface.
+				name (string)
+					Name of method.
+				version (int)
+					Version of method.
+				httpmethod (string)
+					Allowed HTTP method for method (GET, POST).
+				parameters (array)
+					name (string)
+						Name of parameter.
+					type (string)
+						Expected type of value.
+					optional (bool)
+						Is input optional for the method.
+					description (string)
+						API Documentation of parameter.
+	'''
+	url = 'http://api.steampowered.com/ISteamWebAPIUtil/GetSupportedAPIList/v0001/'
+	args = {'key': key}
+	return fetch(url, args)
 
 if __name__ == '__main__':
 	key = '3103AA4F6DED20345780558E594BAC3D'
@@ -374,4 +565,6 @@ if __name__ == '__main__':
 	#print GetMatchHistory(key, {})
 	#print GetMatchHistoryBySequenceNum(key)
 	#print GetScheduledLeagueGames(key)
-	print GetTeamInfoByTeamID(key)
+	#print GetTeamInfoByTeamID(key)
+	#print GetRarities(key)
+	#print GetHeroes(key, 'zh')
