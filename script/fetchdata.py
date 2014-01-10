@@ -29,7 +29,6 @@ def main():
 			}
 	data = apiadapter.GetMatchHistory(KEY, args)
 	(num, ids, data) = jsonparse(data)
-	print data
 	while num > 0 and len(ids) > 0:
 		start_at_match_id = ids[-1]
 		args = {
@@ -40,8 +39,10 @@ def main():
 				}
 		data = apiadapter.GetMatchHistory(KEY, args)
 		(num, ids, data) = jsonparse(data)
-		print data
-		break
+		for match_id in ids:
+			data = apiadapter.GetMatchDetails(KEY, match_id)
+			print data
+			break
 
 def test_seq():
 	begin = time.strptime('2014-01-01 14:00:00', '%Y-%m-%d %H:%M:%S')
@@ -54,5 +55,5 @@ def test_seq():
 	print data
 
 if __name__ == '__main__':
-	#main()
-	test_seq()
+	main()
+	#test_seq()
